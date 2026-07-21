@@ -207,11 +207,12 @@ function closeDelete() { closeDialog("#delete-modal", "#delete-backdrop"); }
 
 async function createWallet(event) {
   event.preventDefault();
+  const form = event.currentTarget;
   const button = $("#create-wallet-submit");
   button.disabled = true; button.textContent = "Creating secure wallet…";
   try {
     const created = await api("/wallets", { method: "POST", body: JSON.stringify({ name: $("#wallet-name-input").value.trim() }) });
-    event.currentTarget.reset(); closeCreate(); showToast(`${created.name} created`); await loadWallets(created.id);
+    form.reset(); closeCreate(); showToast(`${created.name} created`); await loadWallets(created.id);
   } catch (error) { showToast(error.message); }
   finally { button.disabled = false; button.innerHTML = `Create wallet <span>→</span>`; }
 }
@@ -236,11 +237,11 @@ async function fund() {
 }
 
 async function send(event) {
-  event.preventDefault(); const button = $("#send-submit"); button.disabled = true; button.textContent = "Sending…";
+  event.preventDefault(); const form = event.currentTarget; const button = $("#send-submit"); button.disabled = true; button.textContent = "Sending…";
   try {
     const result = await api(`/wallets/${encodeURIComponent(wallet.id)}/transfer`, { method: "POST", body: JSON.stringify({ recipient: $("#recipient").value.trim(), sol: $("#amount").value }) });
     showToast(result.recipientUsername ? `Sent to @${result.recipientUsername}` : `Transfer ${short(result.signature)}`);
-    event.currentTarget.reset(); closeSend(); await loadWallet();
+    form.reset(); closeSend(); await loadWallet();
   } catch (error) { showToast(error.message); }
   finally { button.disabled = false; button.innerHTML = `Review &amp; send <span>→</span>`; }
 }

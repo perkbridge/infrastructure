@@ -13,11 +13,26 @@ x-agave-image: &agave-image
   environment:
     RUST_LOG: ${RUST_LOG:-info}
 
-x-validator-healthcheck: &validator-healthcheck
+x-validator-startup-healthcheck: &validator-startup-healthcheck
   test: ["CMD-SHELL", "solana --url http://$$(hostname -i):8899 cluster-version"]
   interval: 10s
   timeout: 5s
-  retries: 30
+  retries: 120
+  start_period: 30s
+
+x-rpc-healthcheck: &rpc-healthcheck
+  test:
+    - CMD-SHELL
+    - >-
+      slot=$$(solana --url http://$$(hostname -i):8899 slot 2>/dev/null) &&
+      test "$${slot}" -gt 0 &&
+      curl --fail --silent
+      --header 'content-type: application/json'
+      --data '{"jsonrpc":"2.0","id":1,"method":"getHealth"}'
+      http://$$(hostname -i):8899 | grep --quiet '"result":"ok"'
+  interval: 10s
+  timeout: 5s
+  retries: 120
   start_period: 30s
 
 services:
@@ -72,7 +87,7 @@ services:
       genesis:
         condition: service_completed_successfully
     healthcheck:
-      <<: *validator-healthcheck
+      <<: *validator-startup-healthcheck
     volumes:
       - cluster-config:/config:ro
       - genesis-ledger:/genesis:ro
@@ -86,7 +101,7 @@ services:
       bootstrap-validator:
         condition: service_healthy
     healthcheck:
-      <<: *validator-healthcheck
+      <<: *validator-startup-healthcheck
     volumes:
       - cluster-config:/config:ro
       - genesis-ledger:/genesis:ro
@@ -100,7 +115,7 @@ services:
       voting-validator-1:
         condition: service_healthy
     healthcheck:
-      <<: *validator-healthcheck
+      <<: *validator-startup-healthcheck
     volumes:
       - cluster-config:/config:ro
       - genesis-ledger:/genesis:ro
@@ -114,7 +129,7 @@ services:
       voting-validator-2:
         condition: service_healthy
     healthcheck:
-      <<: *validator-healthcheck
+      <<: *rpc-healthcheck
     ports:
       - "${RPC_PORT:-8899}:8899"
       - "${RPC_WEBSOCKET_PORT:-8900}:8900"
