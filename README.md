@@ -1,5 +1,7 @@
 # Dockerized Agave local cluster
 
+![PerkBridge portal showing the Wallet and Explorer applications](docs/images/perkbridge-portal.png)
+
 A persistent, multi-node Solana development cluster running Agave **v4.1.2**:
 
 - one bootstrap voting validator;
