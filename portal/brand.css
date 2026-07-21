@@ -1,0 +1,10 @@
+.brand-mark {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #07110e;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.brand-mark i { display: none; }

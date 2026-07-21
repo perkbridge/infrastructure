@@ -1,0 +1,237 @@
+name: ${COMPOSE_PROJECT_NAME:-agave-localnet}
+
+x-agave-image: &agave-image
+  image: agave-localnet:v4.1.2
+  # v4.1.2 has no official Linux ARM64 release; Docker Desktop emulates AMD64.
+  platform: linux/amd64
+  build:
+    context: .
+    args:
+      AGAVE_VERSION: v4.1.2
+  restart: unless-stopped
+  networks: [solana]
+  environment:
+    RUST_LOG: ${RUST_LOG:-info}
+
+x-validator-healthcheck: &validator-healthcheck
+  test: ["CMD-SHELL", "solana --url http://$$(hostname -i):8899 cluster-version"]
+  interval: 10s
+  timeout: 5s
+  retries: 30
+  start_period: 30s
+
+services:
+  keycloak:
+    build:
+      context: ./keycloak
+    image: agave-localnet-keycloak:26.7.0
+    command: ["start-dev", "--import-realm"]
+    # Development-only H2 volume: Docker creates the mounted subdirectory as root.
+    user: "0:0"
+    restart: unless-stopped
+    networks: [solana]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-local-development-admin}
+      WALLET_APP_PORT: ${WALLET_APP_PORT:-3100}
+      KC_HEALTH_ENABLED: "true"
+      KC_HTTP_RELATIVE_PATH: /auth
+      JAVA_OPTS_KC_HEAP: "-XX:InitialRAMPercentage=20 -XX:MaxRAMPercentage=65"
+    mem_limit: 1g
+    ports:
+      - "127.0.0.1:${KEYCLOAK_PORT:-8080}:8080"
+    volumes:
+      - keycloak-data:/opt/keycloak/data/h2
+
+  keycloak-config:
+    image: agave-localnet-keycloak:26.7.0
+    entrypoint: ["/opt/keycloak/bin/provision-swagger-client.sh"]
+    restart: "no"
+    networks: [solana]
+    depends_on:
+      keycloak:
+        condition: service_started
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-local-development-admin}
+      WALLET_APP_PORT: ${WALLET_APP_PORT:-3100}
+
+  genesis:
+    <<: *agave-image
+    restart: "no"
+    command: ["init-genesis"]
+    volumes:
+      - cluster-config:/config
+      - genesis-ledger:/genesis
+
+  bootstrap-validator:
+    <<: *agave-image
+    hostname: bootstrap-validator
+    command: ["validator", "bootstrap"]
+    depends_on:
+      genesis:
+        condition: service_completed_successfully
+    healthcheck:
+      <<: *validator-healthcheck
+    volumes:
+      - cluster-config:/config:ro
+      - genesis-ledger:/genesis:ro
+      - bootstrap-ledger:/ledger
+
+  voting-validator-1:
+    <<: *agave-image
+    hostname: voting-validator-1
+    command: ["validator", "validator-1"]
+    depends_on:
+      bootstrap-validator:
+        condition: service_healthy
+    healthcheck:
+      <<: *validator-healthcheck
+    volumes:
+      - cluster-config:/config:ro
+      - genesis-ledger:/genesis:ro
+      - validator-1-ledger:/ledger
+
+  voting-validator-2:
+    <<: *agave-image
+    hostname: voting-validator-2
+    command: ["validator", "validator-2"]
+    depends_on:
+      voting-validator-1:
+        condition: service_healthy
+    healthcheck:
+      <<: *validator-healthcheck
+    volumes:
+      - cluster-config:/config:ro
+      - genesis-ledger:/genesis:ro
+      - validator-2-ledger:/ledger
+
+  rpc:
+    <<: *agave-image
+    hostname: rpc
+    command: ["validator", "rpc"]
+    depends_on:
+      voting-validator-2:
+        condition: service_healthy
+    healthcheck:
+      <<: *validator-healthcheck
+    ports:
+      - "${RPC_PORT:-8899}:8899"
+      - "${RPC_WEBSOCKET_PORT:-8900}:8900"
+    volumes:
+      - cluster-config:/config:ro
+      - genesis-ledger:/genesis:ro
+      - rpc-ledger:/ledger
+
+  faucet:
+    <<: *agave-image
+    hostname: faucet
+    command: ["faucet"]
+    depends_on:
+      genesis:
+        condition: service_completed_successfully
+    ports:
+      - "${FAUCET_PORT:-9900}:9900"
+    volumes:
+      - cluster-config:/config:ro
+
+  toolbox:
+    <<: *agave-image
+    hostname: toolbox
+    command: ["toolbox"]
+    depends_on:
+      rpc:
+        condition: service_healthy
+      faucet:
+        condition: service_started
+    stdin_open: true
+    tty: true
+    volumes:
+      - cluster-config:/config:ro
+      - toolbox-data:/root
+
+  wallet-service:
+    build:
+      context: .
+      target: wallet-service
+      args:
+        AGAVE_VERSION: v4.1.2
+    image: agave-localnet-wallets:v4.1.2
+    platform: linux/amd64
+    restart: unless-stopped
+    networks: [solana]
+    depends_on:
+      keycloak-config:
+        condition: service_completed_successfully
+      rpc:
+        condition: service_healthy
+      faucet:
+        condition: service_started
+    environment:
+      SOLANA_RPC_URL: http://rpc:8899
+      WALLET_MASTER_KEY: ${WALLET_MASTER_KEY:-local-development-only-key-change-me}
+      KEYCLOAK_ISSUER: http://localhost:${WALLET_APP_PORT:-3100}/auth/realms/local-wallet
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/auth/realms/local-wallet/protocol/openid-connect/certs
+      KEYCLOAK_AUDIENCE: wallet-api
+      WALLET_PRIVATE_KEY_EXPORT_ENABLED: ${WALLET_PRIVATE_KEY_EXPORT_ENABLED:-true}
+      WALLET_TRANSACTION_SIGNING_ENABLED: ${WALLET_TRANSACTION_SIGNING_ENABLED:-true}
+      WALLET_LEGACY_API_ENABLED: ${WALLET_LEGACY_API_ENABLED:-false}
+    ports:
+      - "127.0.0.1:${WALLET_API_PORT:-8787}:8787"
+    volumes:
+      - custodial-wallets:/wallets
+
+  wallet-app:
+    build:
+      context: ./wallet-app
+    image: agave-localnet-wallet-app:latest
+    restart: unless-stopped
+    networks: [solana]
+    depends_on:
+      keycloak:
+        condition: service_started
+      wallet-service:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${WALLET_APP_PORT:-3100}:80"
+
+  portal:
+    build:
+      context: ./portal
+    image: agave-localnet-portal:latest
+    restart: unless-stopped
+    networks: [solana]
+    depends_on:
+      explorer:
+        condition: service_healthy
+      wallet-app:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${PORTAL_PORT:-3000}:80"
+
+  explorer:
+    build:
+      context: ./explorer
+    image: agave-localnet-explorer:latest
+    restart: unless-stopped
+    networks: [solana]
+    depends_on:
+      rpc:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${EXPLORER_PORT:-3001}:80"
+
+networks:
+  solana:
+    driver: bridge
+
+volumes:
+  cluster-config:
+  genesis-ledger:
+  bootstrap-ledger:
+  validator-1-ledger:
+  validator-2-ledger:
+  rpc-ledger:
+  toolbox-data:
+  custodial-wallets:
+  keycloak-data:

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080b12" />
+    <title>PerkBridge Wallet</title>
+    <link rel="stylesheet" href="/styles.css?v=20260721-3" />
+    <link rel="stylesheet" href="/theme.css?v=20260721-3" />
+    <link rel="stylesheet" href="/dashboard.css?v=20260721-3" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="aurora aurora-one" aria-hidden="true"></div>
+    <div class="aurora aurora-two" aria-hidden="true"></div>
+
+    <main id="landing" class="landing">
+      <nav class="landing-nav">
+        <a class="logo" href="http://localhost:3000"><span class="logo-mark">P</span><span>PerkBridge<small>LOCAL WALLET</small></span></a>
+        <div class="nav-actions"><button class="theme-toggle" type="button">Light mode</button><button id="login-top" class="quiet-button">Sign in</button></div>
+      </nav>
+      <section class="landing-content">
+        <div class="landing-copy">
+          <p class="eyebrow">YOUR LOCALNET, IN MOTION</p>
+          <h1>Money should feel<br /><em>this simple.</em></h1>
+          <p class="lede">A private development wallet for your Docker Solana network. Send local SOL to people by name or address.</p>
+          <div class="landing-actions"><button id="register-button" class="primary-button">Create an account <span>→</span></button><button id="login-button" class="link-button">I already have one</button></div>
+          <div class="trust-row"><span><i></i>Keycloak identity</span><span><i></i>Encrypted custody</span><span><i></i>Localnet only</span></div>
+        </div>
+        <div class="wallet-preview" aria-hidden="true">
+          <div class="preview-card back-card"></div>
+          <div class="preview-card main-card">
+            <div class="preview-head"><span class="mini-logo">P</span><span>PERKBRIDGE</span></div>
+            <small>AVAILABLE BALANCE</small><strong>128.40</strong><span class="currency">SOL</span>
+            <div class="preview-user"><span class="avatar">AZ</span><div><b>@alex</b><small>7xcP…m91Q</small></div></div>
+          </div>
+          <div class="transfer-chip"><span>→</span><div><small>SENT TO @MAYA</small><strong>12.00 SOL</strong></div></div>
+        </div>
+      </section>
+      <p class="dev-notice">Development wallet · Do not use real funds</p>
+    </main>
+
+    <main id="dashboard" class="dashboard" hidden>
+      <aside class="sidebar">
+        <a class="logo" href="http://localhost:3000"><span class="logo-mark">P</span><span>PerkBridge<small>LOCAL WALLET</small></span></a>
+        <nav>
+          <a class="nav-item active" href="#wallets-section"><span>◫</span>My wallets</a>
+          <a class="nav-item" href="#transactions-section"><span>⇄</span>Transactions</a>
+          <a class="nav-item" href="http://localhost:3001" target="_blank" rel="noreferrer"><span>◇</span>Explorer</a>
+          <a class="nav-item" href="/wallet-api/docs" target="_blank" rel="noreferrer"><span>{ }</span>API docs</a>
+        </nav>
+        <div class="sidebar-foot"><div id="identity-card" class="identity-card"><span id="identity-avatar" class="avatar">—</span><div><strong id="identity-name">Loading</strong><small>Keycloak account</small></div></div><button id="logout-button" class="logout-button">Sign out</button></div>
+      </aside>
+
+      <section class="workspace">
+        <header class="workspace-head">
+          <div><p class="eyebrow">CUSTODIAL LOCAL WALLET</p><h1>Good <span id="greeting-time">day</span>, <span id="greeting-name">friend</span>.</h1><p class="workspace-subtitle">Create wallets, move local SOL, and review every transaction from one place.</p></div>
+          <div class="workspace-actions"><button class="theme-toggle" type="button">Light mode</button><div class="network-pill"><i></i>Localnet live</div><button id="create-wallet-top" class="compact-primary" type="button">＋ New wallet</button></div>
+        </header>
+
+        <div id="app-error" class="app-error" hidden></div>
+        <section id="wallets-section" class="wallets-layout">
+          <aside class="wallet-list-panel">
+            <div class="panel-title"><div><p class="eyebrow">PORTFOLIO</p><h2>My wallets <span id="wallet-count">0</span></h2></div><button id="create-wallet" class="square-add" type="button" aria-label="Create a new wallet">＋</button></div>
+            <div id="wallet-list" class="wallet-list"><div class="wallet-list-loading">Loading wallets…</div></div>
+            <div class="wallet-limit"><span>Encrypted custody</span><b><span id="wallet-limit-count">0</span>/10</b></div>
+          </aside>
+
+          <div class="wallet-detail">
+            <div class="selected-wallet-head">
+              <div><p class="eyebrow">SELECTED WALLET</p><h2 id="wallet-name">Loading wallet…</h2><p id="wallet-created" class="wallet-created">Secure custodial keypair</p></div>
+              <button id="delete-wallet" class="danger-link" type="button">Delete wallet</button>
+            </div>
+            <section class="balance-card">
+              <div class="balance-copy"><small>AVAILABLE BALANCE</small><div><strong id="balance">—</strong><span>SOL</span></div><button id="copy-address" class="address-button" type="button"><span id="wallet-address">Provisioning wallet…</span><b>Copy address</b></button></div>
+              <div class="balance-actions"><button id="open-send" class="round-action" type="button"><span>↗</span><b>Send</b></button><button id="fund-button" class="round-action" type="button"><span>＋</span><b>Fund</b></button><button id="refresh-button" class="round-action" type="button"><span>↻</span><b>Refresh</b></button></div>
+              <div class="card-lines" aria-hidden="true"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="transactions-section" class="activity-panel transactions-panel">
+          <div class="section-head"><div><p class="eyebrow">LEDGER</p><h2>Transactions</h2><p id="transaction-wallet-label">Selected wallet activity</p></div><button id="history-refresh" class="text-button" type="button">↻ Refresh</button></div>
+          <div class="transaction-columns" aria-hidden="true"><span>Transaction</span><span>Status</span><span>Time</span></div>
+          <div id="activity-list" class="activity-list"><div class="empty"><strong>Loading transactions</strong><span>Reading the local ledger.</span></div></div>
+        </section>
+
+        <section class="receive-panel">
+          <div class="handle-row"><span id="profile-avatar" class="large-avatar">—</span><div><p class="eyebrow">YOUR PAYMENT HANDLE</p><strong id="profile-username">@—</strong><small>Transfers to your username arrive in your oldest wallet.</small></div></div>
+          <button id="profile-copy" class="outline-button" type="button">Copy selected wallet address</button>
+        </section>
+      </section>
+    </main>
+
+    <div id="create-backdrop" class="modal-backdrop" hidden></div>
+    <section id="create-modal" class="dialog-modal" aria-hidden="true" aria-labelledby="create-title">
+      <div class="modal-head"><div><p class="eyebrow">NEW WALLET</p><h2 id="create-title">Create another wallet</h2></div><button id="close-create" type="button" aria-label="Close">×</button></div>
+      <form id="create-wallet-form">
+        <label for="wallet-name-input">WALLET NAME</label>
+        <input id="wallet-name-input" maxlength="60" placeholder="e.g. Spending, Rewards, Treasury" autocomplete="off" required />
+        <small class="field-help">A new encrypted Solana keypair will be generated and stored in the persistent wallet volume.</small>
+        <div class="dialog-note"><span>◆</span><p><strong>Development custody</strong>Your private key never leaves the wallet service.</p></div>
+        <button id="create-wallet-submit" class="primary-button" type="submit">Create wallet <span>→</span></button>
+      </form>
+    </section>
+
+    <div id="delete-backdrop" class="modal-backdrop" hidden></div>
+    <section id="delete-modal" class="dialog-modal danger-dialog" aria-hidden="true" aria-labelledby="delete-title">
+      <div class="modal-head"><div><p class="eyebrow danger-text">PERMANENT ACTION</p><h2 id="delete-title">Delete this wallet?</h2></div><button id="close-delete" type="button" aria-label="Close">×</button></div>
+      <form id="delete-wallet-form">
+        <p class="dialog-description">This removes the encrypted private key. Any remaining balance will become inaccessible.</p>
+        <label for="delete-confirmation">TYPE THE FULL WALLET ADDRESS</label>
+        <input id="delete-confirmation" autocomplete="off" spellcheck="false" required />
+        <button id="delete-wallet-submit" class="danger-button" type="submit">Permanently delete wallet</button>
+      </form>
+    </section>
+
+    <div id="send-backdrop" class="modal-backdrop" hidden></div>
+    <section id="send-modal" class="send-modal" aria-hidden="true">
+      <div class="modal-head"><div><p class="eyebrow">NEW TRANSFER</p><h2>Send local SOL</h2></div><button id="close-send" aria-label="Close">×</button></div>
+      <form id="send-form">
+        <div class="send-from"><span>FROM</span><strong id="send-wallet-name">Selected wallet</strong><small id="send-wallet-balance">— SOL available</small></div>
+        <label for="recipient">RECIPIENT</label><input id="recipient" list="user-suggestions" placeholder="@username or Solana address" autocomplete="off" required /><datalist id="user-suggestions"></datalist><small class="field-help">Use a registered @username or paste a public address.</small>
+        <label for="amount">AMOUNT</label><div class="amount-field"><input id="amount" type="number" min="0.000000001" max="1000000" step="any" placeholder="0.00" required /><span>SOL</span></div>
+        <div class="send-summary"><span>Network</span><strong>Private localnet</strong></div><button id="send-submit" class="primary-button" type="submit">Review & send <span>→</span></button>
+      </form>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js?v=20260721-3" defer></script>
+  </body>
+</html>

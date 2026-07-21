@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#070a10" />
+    <title>PerkBridge — Localnet</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/brand.css" />
+    <link rel="stylesheet" href="/theme.css" />
+  </head>
+  <body>
+    <div class="grid" aria-hidden="true"></div>
+    <div class="glow glow-one" aria-hidden="true"></div>
+    <div class="glow glow-two" aria-hidden="true"></div>
+
+    <header>
+      <a class="brand" href="/"><span class="brand-mark">P</span><span>PERKBRIDGE<small>PRIVATE LOCALNET</small></span></a>
+      <div class="header-actions"><div class="cluster-state"><i></i><span>Development network</span></div><button class="theme-toggle" type="button">Light mode</button></div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <p class="eyebrow">CHOOSE YOUR WORKSPACE</p>
+        <h1>One local network.<br /><span>Two ways in.</span></h1>
+        <p>Manage your development funds or inspect what is happening on-chain. Both applications connect to the same private Agave cluster.</p>
+      </section>
+
+      <section class="choice-grid" aria-label="Applications">
+        <a id="wallet-link" class="choice wallet-choice" href="http://localhost:3100">
+          <div class="choice-top"><span class="number">01</span><span id="wallet-status" class="status checking"><i></i>Checking</span></div>
+          <div class="choice-visual wallet-visual"><div class="mini-card card-back"></div><div class="mini-card card-front"><small>LOCAL BALANCE</small><strong>◎ 128.40</strong><span>@yourname</span></div></div>
+          <div class="choice-copy"><p class="eyebrow">KEYCLOAK PROTECTED</p><h2>Wallet</h2><p>Register, receive local SOL, and send funds to another user by name or address.</p><span class="open-label">Open wallet <b>↗</b></span></div>
+        </a>
+
+        <a class="choice explorer-choice" href="http://localhost:3001">
+          <div class="choice-top"><span class="number">02</span><span id="explorer-status" class="status checking"><i></i>Checking</span></div>
+          <div class="choice-visual explorer-visual"><div class="orbit one"></div><div class="orbit two"></div><div class="chain-node center">RPC</div><div class="chain-node node-a">V₀</div><div class="chain-node node-b">V₁</div><div class="chain-node node-c">V₂</div></div>
+          <div class="choice-copy"><p class="eyebrow">READ-ONLY OBSERVATORY</p><h2>Explorer</h2><p>Inspect blocks, transactions, programs, validators, accounts, and SPL tokens.</p><span class="open-label">Open explorer <b>↗</b></span></div>
+        </a>
+      </section>
+    </main>
+
+    <footer><span>Agave v4.1.2</span><span>Docker localnet</span><span>Never use real funds</span></footer>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

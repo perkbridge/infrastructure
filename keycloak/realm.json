@@ -1,0 +1,98 @@
+{
+  "realm": "local-wallet",
+  "displayName": "PerkBridge",
+  "enabled": true,
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "resetPasswordAllowed": true,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "editUsernameAllowed": false,
+  "sslRequired": "none",
+  "loginTheme": "local-wallet",
+  "accountTheme": "keycloak.v3",
+  "accessTokenLifespan": 3600,
+  "ssoSessionIdleTimeout": 28800,
+  "ssoSessionMaxLifespan": 86400,
+  "clients": [
+    {
+      "clientId": "wallet-app",
+      "name": "Local Wallet App",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://localhost:3100/*", "http://127.0.0.1:3100/*"],
+      "webOrigins": ["http://localhost:3100", "http://127.0.0.1:3100"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3100/*##http://127.0.0.1:3100/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "wallet-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "wallet-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "lightweight.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "wallet-swagger",
+      "name": "PerkBridge Swagger API",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "http://localhost:3100",
+      "baseUrl": "http://localhost:3100/wallet-api/docs",
+      "redirectUris": ["http://localhost:3100/*", "http://127.0.0.1:3100/*"],
+      "webOrigins": ["http://localhost:3100", "http://127.0.0.1:3100"],
+      "protocolMappers": [
+        {
+          "name": "wallet-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "wallet-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "lightweight.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "wallet-api",
+      "name": "Local Wallet API",
+      "enabled": true,
+      "bearerOnly": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    }
+  ],
+  "roles": {
+    "realm": [
+      {"name": "wallet-user", "description": "May use the local custodial wallet"}
+    ]
+  },
+  "defaultRole": {
+    "name": "default-roles-local-wallet",
+    "description": "Default realm role",
+    "composite": true,
+    "composites": {"realm": ["offline_access", "uma_authorization", "wallet-user"]}
+  }
+}

@@ -1,0 +1,8 @@
+FROM nginx:1.27-alpine
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY index.html styles.css brand.css theme.css app.js /usr/share/nginx/html/
+
+EXPOSE 80
+HEALTHCHECK --interval=10s --timeout=3s --retries=10 \
+  CMD wget --quiet --spider http://127.0.0.1/health || exit 1

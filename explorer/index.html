@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080b12" />
+    <title>Agave Localnet Observatory</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="ambient-grid" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Localnet Observatory home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" role="img">
+            <path d="M8 11h18l6 6H14zM8 20h18l6 6H14zM8 29h18l6-6H14z" />
+          </svg>
+        </span>
+        <span>
+          <strong>LOCALNET</strong>
+          <small>OBSERVATORY</small>
+        </span>
+      </a>
+
+      <form id="search-form" class="search" role="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg>
+        <input id="search-input" autocomplete="off" placeholder="Search slot, signature, or account" aria-label="Search the local cluster" />
+        <kbd>/</kbd>
+      </form>
+
+      <div id="connection-pill" class="connection-pill waiting">
+        <span class="status-dot"></span>
+        <span id="connection-label">Connecting</span>
+      </div>
+    </header>
+
+    <main>
+      <nav class="view-nav" aria-label="Explorer sections">
+        <button class="view-tab active" data-view="overview">Overview</button>
+        <button class="view-tab" data-view="transactions">Transactions</button>
+        <button class="view-tab" data-view="programs">Programs</button>
+        <button class="view-tab" data-view="tokens">SPL Tokens</button>
+      </nav>
+
+      <div id="overview-view" class="view-section active">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">PRIVATE DEVELOPMENT NETWORK</p>
+          <h1>See your local chain<br /><span>as it happens.</span></h1>
+          <p class="hero-copy">A focused view of blocks, validators, accounts, and transactions running inside your Docker cluster.</p>
+        </div>
+        <div class="slot-orbit" aria-label="Current slot">
+          <div class="orbit-ring ring-one"></div>
+          <div class="orbit-ring ring-two"></div>
+          <div class="slot-core">
+            <small>CURRENT SLOT</small>
+            <strong id="hero-slot">—</strong>
+            <span><i></i> advancing</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="metric-grid" aria-label="Cluster metrics">
+        <article class="metric-card featured">
+          <div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5" /></svg></div>
+          <div><small>BLOCK HEIGHT</small><strong id="block-height">—</strong><span id="block-delta">Live cluster head</span></div>
+        </article>
+        <article class="metric-card">
+          <small>TRANSACTIONS</small><strong id="transaction-count">—</strong><span>Processed since genesis</span>
+        </article>
+        <article class="metric-card">
+          <small>ACTIVE STAKE</small><strong id="active-stake">—</strong><span id="validator-count">3 voting validators</span>
+        </article>
+        <article class="metric-card">
+          <small>EPOCH PROGRESS</small><strong id="epoch-label">—</strong>
+          <div class="progress"><i id="epoch-progress"></i></div><span id="epoch-detail">Loading epoch data</span>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel blocks-panel">
+          <div class="panel-head">
+            <div><p class="eyebrow">CHAIN ACTIVITY</p><h2>Latest blocks</h2></div>
+            <button id="refresh-button" class="icon-button" title="Refresh now" aria-label="Refresh blocks">
+              <svg viewBox="0 0 24 24"><path d="M20 6v5h-5M4 18v-5h5M6.1 9a7 7 0 0 1 11.4-2.6L20 9M4 15l2.5 2.6A7 7 0 0 0 17.9 15" /></svg>
+            </button>
+          </div>
+          <div id="blocks-list" class="blocks-list loading-list">
+            <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+          </div>
+        </article>
+
+        <aside class="panel network-panel">
+          <div class="panel-head">
+            <div><p class="eyebrow">NETWORK</p><h2>Cluster pulse</h2></div>
+            <span id="version-badge" class="version-badge">Agave —</span>
+          </div>
+          <div class="pulse-visual" aria-hidden="true">
+            <div class="pulse-ring p1"></div><div class="pulse-ring p2"></div><div class="pulse-ring p3"></div>
+            <div class="node center-node">RPC</div>
+            <div class="node n1">V₀</div><div class="node n2">V₁</div><div class="node n3">V₂</div>
+          </div>
+          <dl class="network-facts">
+            <div><dt>RPC endpoint</dt><dd>/api/</dd></div>
+            <div><dt>Commitment</dt><dd>Confirmed</dd></div>
+            <div><dt>Cluster</dt><dd>Development</dd></div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="panel validators-panel">
+        <div class="panel-head">
+          <div><p class="eyebrow">CONSENSUS</p><h2>Voting validators</h2></div>
+          <span class="legend"><i></i> Genesis staked</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>IDENTITY</th><th>VOTE ACCOUNT</th><th>STAKE</th><th>LAST VOTE</th><th>STATUS</th></tr></thead>
+            <tbody id="validators-body"><tr><td colspan="5"><div class="skeleton"></div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      </div>
+
+      <section id="transactions-view" class="view-section structured-view">
+        <div class="section-intro"><p class="eyebrow">LEDGER</p><h1>Transactions</h1><p>Recent confirmed activity, decoded and grouped by block.</p></div>
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">LATEST CONFIRMED</p><h2>Transaction stream</h2></div><span id="tx-total-badge" class="version-badge">0 loaded</span></div>
+          <div class="table-wrap"><table><thead><tr><th>SIGNATURE</th><th>SLOT</th><th>PROGRAMS</th><th>FEE</th><th>RESULT</th></tr></thead><tbody id="transactions-body"><tr><td colspan="5"><div class="skeleton"></div></td></tr></tbody></table></div>
+        </article>
+      </section>
+
+      <section id="programs-view" class="view-section structured-view">
+        <div class="section-intro"><p class="eyebrow">RUNTIME</p><h1>Programs</h1><p>Programs invoked by recent transactions, ranked by activity.</p></div>
+        <div id="programs-grid" class="programs-grid"><div class="program-card"><div class="skeleton"></div></div></div>
+      </section>
+
+      <section id="tokens-view" class="view-section structured-view">
+        <div class="section-intro"><p class="eyebrow">TOKEN LEDGER</p><h1>SPL Tokens</h1><p>Inspect classic SPL Token and Token-2022 holdings for any local account.</p></div>
+        <div class="token-layout">
+          <article class="panel token-query-panel">
+            <div class="panel-head"><div><p class="eyebrow">OWNER LOOKUP</p><h2>Token portfolio</h2></div></div>
+            <form id="token-owner-form" class="token-form"><label for="token-owner">OWNER ADDRESS</label><div><input id="token-owner" placeholder="Paste a wallet address" autocomplete="off" /><button type="submit">Inspect tokens</button></div></form>
+            <div id="token-results" class="token-results"><div class="empty-state"><strong>No owner selected</strong>Enter an address to load its SPL token accounts.</div></div>
+          </article>
+          <aside class="panel token-standards">
+            <div class="panel-head"><div><p class="eyebrow">STANDARDS</p><h2>Supported programs</h2></div></div>
+            <div class="standard-card"><span class="program-glyph">T</span><div><strong>SPL Token</strong><small>Tokenkeg…DA</small></div></div>
+            <div class="standard-card"><span class="program-glyph violet">22</span><div><strong>Token-2022</strong><small>TokenzQd…Eb</small></div></div>
+          </aside>
+        </div>
+      </section>
+
+    </main>
+
+    <div id="inspector-backdrop" class="inspector-backdrop" hidden></div>
+    <aside id="inspector" class="inspector" aria-hidden="true" aria-label="Explorer details">
+      <div class="inspector-head">
+        <div><p class="eyebrow">INSPECTOR</p><h2 id="inspector-title">Details</h2></div>
+        <button id="inspector-close" class="icon-button" aria-label="Close inspector"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
+      </div>
+      <div id="inspector-content" class="inspector-content"></div>
+    </aside>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

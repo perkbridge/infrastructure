@@ -1,0 +1,12 @@
+.nav-actions,.workspace-actions{display:flex;align-items:center;gap:12px}.theme-toggle{height:36px;padding:0 13px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:8px var(--mono);text-transform:uppercase;letter-spacing:.1em;cursor:pointer}
+html[data-theme="light"]{--bg:#f4f1ea;--surface:#fff;--surface-2:#f7f4ee;--line:#ddd8ce;--line-bright:#b9b2a5;--text:#151a1d;--muted:#68727b;--mint:#087f69;--mint-soft:rgba(8,127,105,.09);--violet:#6957ba;--danger:#c73752}
+html[data-theme="light"],html[data-theme="light"] body{background:#f4f1ea}
+html[data-theme="light"] .noise{opacity:.018}html[data-theme="light"] .aurora{opacity:.07}
+html[data-theme="light"] .lede{color:#56616b}html[data-theme="light"] .quiet-button{background:#fff}
+html[data-theme="light"] .preview-card.main-card{background:linear-gradient(145deg,#e5fbf5,#fff 70%);border-color:#a5d7cb;box-shadow:0 38px 80px rgba(47,43,34,.13)}
+html[data-theme="light"] .back-card{background:rgba(105,87,186,.06)}html[data-theme="light"] .transfer-chip{background:#fff;box-shadow:0 14px 35px rgba(47,43,34,.12)}
+html[data-theme="light"] .sidebar{background:rgba(250,248,243,.92)}html[data-theme="light"] .balance-card{background:linear-gradient(120deg,#e1f7f1,#fff 72%);border-color:#acd8cd;box-shadow:0 25px 65px rgba(47,43,34,.09)}
+html[data-theme="light"] .activity-panel,html[data-theme="light"] .profile-panel{box-shadow:0 15px 45px rgba(47,43,34,.055)}
+html[data-theme="light"] .send-modal{background:#fbfaf6}html[data-theme="light"] .send-modal input{background:#fff}
+html[data-theme="light"] .logo-mark,html[data-theme="light"] .mini-logo{color:#fff}
+@media(max-width:700px){.workspace-actions .theme-toggle{display:none}.nav-actions{gap:6px}}

@@ -1,0 +1,4 @@
+.env
+.DS_Store
+
+wallet-service/__pycache__/*
